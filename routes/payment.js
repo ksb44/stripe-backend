@@ -62,6 +62,57 @@ const supabase = require('../models/supabaseClient');
 const router = express.Router();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+/**
+ * @swagger
+ * /api/payment/create:
+ *   post:
+ *     summary: Create a payment
+ *     description: Create a payment intent with Stripe and save the payment details in Supabase.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: integer
+ *                 description: Amount to charge in the smallest currency unit (e.g., cents for USD).
+ *               currency:
+ *                 type: string
+ *                 description: Three-letter currency code (e.g., usd).
+ *               payment_method_data:
+ *                 type: object
+ *                 description: Stripe payment method data.
+ *               description:
+ *                 type: string
+ *                 description: Payment description.
+ *     responses:
+ *       201:
+ *         description: Payment successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 paymentId:
+ *                   type: string
+ *                   description: The Stripe payment intent ID.
+ *                 amount:
+ *                   type: integer
+ *                   description: The payment amount.
+ *                 currency:
+ *                   type: string
+ *                   description: The currency code.
+ *                 status:
+ *                   type: string
+ *                   description: The payment status.
+ *                 description:
+ *                   type: string
+ *                   description: The payment description.
+ *       400:
+ *         description: Bad Request - Invalid input or payment creation failed.
+ */
 router.post('/create', async (req, res) => {
     const { amount, currency, payment_method_data, description } = req.body;
   
@@ -99,7 +150,40 @@ router.post('/create', async (req, res) => {
     }
   });
   
-
+/**
+ * @swagger
+ * /api/payment/{id}:
+ *   get:
+ *     summary: Retrieve payment details
+ *     description: Get payment information from Supabase by payment ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The payment ID.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Payment details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 payment_id:
+ *                   type: string
+ *                 amount:
+ *                   type: integer
+ *                 currency:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *       404:
+ *         description: Payment not found.
+ */
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
